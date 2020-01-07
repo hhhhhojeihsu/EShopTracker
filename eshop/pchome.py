@@ -16,8 +16,8 @@ class pchome:
         if len(item_json) != 1:
           raise exception
         for item_code in item_json:
+          self.original_price = item_json[item_code]["Price"]["M"]
           self.price = item_json[item_code]["Price"]["P"]
-        print(self.price)
       except:
         self.exeception = True
 

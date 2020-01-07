@@ -27,10 +27,12 @@ def parseconf(filename):
     sys.exit(1)
 
   result = dict()
-  shop_list = config_.sections()
-  shop_list.remove('general')
-  for shop in shop_list:
-    result.update({shop: {item: {"url": attribute.split()[0], "target": attribute.split()[1]}} for item, attribute in config_.items(shop)})
+  eshops = config_.sections()
+  eshops.remove('general')
+  for eshop_ in eshops:
+    result[eshop_] = dict()
+    for item, attribute in config_.items(eshop_):
+      result[eshop_].update({item: {"url": attribute.split()[0], "target": attribute.split()[1]}})
   return general, result
 
 def main():
@@ -38,15 +40,32 @@ def main():
   args = parsearg()
 
   # Parse config file
-  configs, shops = parseconf(args.config)
+  configs, item_lists = parseconf(args.config)
 
   # Get each item's current status
   eshop_module = importlib.import_module("eshop")
-  for eshop_ in shops:
+  for eshop_ in item_lists:
     eshop_class = getattr(eshop_module, eshop_)
-    for item in shops[eshop_]:
-      pass
-      #print(eshop_class(item, shops[eshop_][item]['url'], shops[eshop_][item]['target']).result)
+    for item in item_lists[eshop_]:
+      eshop_class_ = eshop_class(item, item_lists[eshop_][item]['url'])
+      if hasattr(eshop_class_, 'exception'):
+        # TODO: Notify
+        continue
+      else:
+        # Get original and current price
+        current_price = eshop_class_.price
+        original_price = eshop_class_.original_price
+
+      # Compare with target
+      target = item_lists[eshop_][item]['target']
+      if '%' in target:
+        if original_price * int(target[:-1]) * 0.01 >= current_price:
+          # TODO: Notify
+          pass
+      else:
+        if current_price <= int(target):
+          # TODO: Notify
+          pass
 
 if __name__ == '__main__':
   main()
