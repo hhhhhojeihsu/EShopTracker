@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from apscheduler.schedulers.blocking import BlockingScheduler
 import argparse
 import configparser
 import sys
@@ -42,13 +43,7 @@ def send_notification(path, item, target, current_price, exception=False):
   else:
     subprocess.Popen([path, item, str(target), str(current_price)])
 
-def main():
-  # Parse arugment
-  args = parsearg()
-
-  # Parse config file
-  configs, item_lists = parseconf(args.config)
-
+def main(configs, item_lists):
   # Get each item's current status
   eshop_module = importlib.import_module("eshop")
   for eshop_ in item_lists:
@@ -73,5 +68,15 @@ def main():
           send_notification(configs['notifier'], item, target, current_price)
 
 if __name__ == '__main__':
-  main()
+  # Parse arugment
+  args = parsearg()
+
+  # Parse config file
+  configs, item_lists = parseconf(args.config)
+
+  main(configs, item_lists)
+  scheduler = BlockingScheduler()
+  scheduler.add_job(main, 'interval', hours=int(configs['interval']), args=[configs, item_lists]) # Data may not be updated on time
+
+  scheduler.start()
 
