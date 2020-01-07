@@ -3,6 +3,7 @@
 import argparse
 import configparser
 import sys
+import importlib
 
 def parsearg():
   argparser_ = argparse.ArgumentParser(prog='EshopTracker',
@@ -10,13 +11,6 @@ def parsearg():
   argparser_.add_argument('-c', '--config',
                           default='eshop.conf',
                           help='config file')
-  argparser_.add_argument('-i', '--interval',
-                          type=int,
-                          default=12,
-                          help='check interval in hour')
-  argparser_.add_argument('-n', '--notifier',
-                          help='external program to notify user',
-                          required=True)
 
   return argparser_.parse_args()
 
@@ -26,17 +20,34 @@ def parseconf(filename):
   if(len(config_.read(filename)) != 1):
     print("Cannot read config file '{}'".format(filename), file=sys.stderr)
     sys.exit(1)
+
+  general = dict(config_['general'])
+  if 'interval' and 'notifier' not in general:
+    print("'interval' and 'notifier' required in [general] section", file=sys.stderr)
+    sys.exit(1)
+
   result = dict()
-  for shop in config_.sections():
+  shop_list = config_.sections()
+  shop_list.remove('general')
+  for shop in shop_list:
     result.update({shop: {item: {"url": attribute.split()[0], "target": attribute.split()[1]}} for item, attribute in config_.items(shop)})
-  return result
+  return general, result
 
 def main():
   # Parse arugment
   args = parsearg()
 
   # Parse config file
-  configs = parseconf(args.config)
+  configs, shops = parseconf(args.config)
+
+  # Get each item's current status
+  eshop_module = importlib.import_module("eshop")
+  for eshop_ in shops:
+    eshop_class = getattr(eshop_module, eshop_)
+    for item in shops[eshop_]:
+      pass
+      #print(eshop_class(item, shops[eshop_][item]['url'], shops[eshop_][item]['target']).result)
 
 if __name__ == '__main__':
   main()
+
