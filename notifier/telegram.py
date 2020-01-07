@@ -14,7 +14,7 @@ def main():
   current = sys.argv[3]
   text = "Price for '{}' has reached the threshold ({}) you set. Current price is {}".format(item, threshold, current)
 
-  with requests.session as s:
+  with requests.session() as s:
     s.get("https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage?chat_id=" + CHAT_ID + "&text=" + text)
 
 
