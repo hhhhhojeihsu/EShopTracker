@@ -3,8 +3,8 @@ import sys
 import requests
 
 ## Telegram
-BOT_TOKEN = "663535919:AAHM7yBFx-_9YAjtBdtHdhRjNKPF4Vce2po" # The token acquired from telegram @BotFather
-CHAT_ID = "-257997234" # Chat that is group/channel/pm that the bot has access to
+BOT_TOKEN = "111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" # The token acquired from telegram @BotFather
+CHAT_ID = "-111111111" # Chat that is group/channel/pm that the bot has access to
 
 def main():
   if(len(sys.argv) == 1):

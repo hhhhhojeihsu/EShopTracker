@@ -4,6 +4,7 @@ import argparse
 import configparser
 import sys
 import importlib
+import subprocess
 
 def parsearg():
   argparser_ = argparse.ArgumentParser(prog='EshopTracker',
@@ -35,6 +36,12 @@ def parseconf(filename):
       result[eshop_].update({item: {"url": attribute.split()[0], "target": attribute.split()[1]}})
   return general, result
 
+def send_notification(path, item, target, current_price, exception=False):
+  if(exception):
+    subprocess.Popen([path])
+  else:
+    subprocess.Popen([path, item, str(target), str(current_price)])
+
 def main():
   # Parse arugment
   args = parsearg()
@@ -49,7 +56,7 @@ def main():
     for item in item_lists[eshop_]:
       eshop_class_ = eshop_class(item, item_lists[eshop_][item]['url'])
       if hasattr(eshop_class_, 'exception'):
-        # TODO: Notify
+        send_notification(configs['notifier'], None, None, None, exception=True)
         continue
       else:
         # Get original and current price
@@ -60,12 +67,10 @@ def main():
       target = item_lists[eshop_][item]['target']
       if '%' in target:
         if original_price * int(target[:-1]) * 0.01 >= current_price:
-          # TODO: Notify
-          pass
+          send_notification(configs['notifier'], item, target, current_price)
       else:
         if current_price <= int(target):
-          # TODO: Notify
-          pass
+          send_notification(configs['notifier'], item, target, current_price)
 
 if __name__ == '__main__':
   main()

@@ -19,5 +19,5 @@ class pchome:
           self.original_price = item_json[item_code]["Price"]["M"]
           self.price = item_json[item_code]["Price"]["P"]
       except:
-        self.exeception = True
+        self.exception = True
 
