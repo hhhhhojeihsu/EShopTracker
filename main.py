@@ -43,7 +43,7 @@ def send_notification(path, item, target, current_price, exception=False):
   else:
     subprocess.Popen([path, item, str(target), str(current_price)])
 
-def main(configs, item_lists):
+def main(configs, item_lists, old_current_price):
   # Get each item's current status
   eshop_module = importlib.import_module("eshop")
   for eshop_ in item_lists:
@@ -53,10 +53,19 @@ def main(configs, item_lists):
       if hasattr(eshop_class_, 'exception'):
         send_notification(configs['notifier'], None, None, None, exception=True)
         continue
-      else:
-        # Get original and current price
-        current_price = eshop_class_.price
-        original_price = eshop_class_.original_price
+
+      # Update old_current_price
+      if item not in old_current_price:
+        old_current_price[item] = -1
+
+      # Get original and current price
+      current_price = eshop_class_.price
+      original_price = eshop_class_.original_price
+
+      # Check if prices has changed
+      if old_current_price[item] == current_price:
+        continue
+      old_current_price[item] = current_price
 
       # Compare with target
       target = item_lists[eshop_][item]['target']
@@ -74,9 +83,11 @@ if __name__ == '__main__':
   # Parse config file
   configs, item_lists = parseconf(args.config)
 
-  main(configs, item_lists)
+  old_current_price = dict()
+
+  main(configs, item_lists, old_current_price)
   scheduler = BlockingScheduler()
-  scheduler.add_job(main, 'interval', hours=int(configs['interval']), args=[configs, item_lists]) # Data may not be updated on time
+  scheduler.add_job(main, 'interval', hours=int(configs['interval']), args=[configs, item_lists, old_current_price]) # Data may not be updated on time
 
   scheduler.start()
 
