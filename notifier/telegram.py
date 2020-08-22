@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import sys
 import requests
+import os
 
 ## Telegram
-BOT_TOKEN = "111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" # The token acquired from telegram @BotFather
-CHAT_ID = "-111111111" # Chat that is group/channel/pm that the bot has access to
+# "111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" The token acquired from telegram @BotFather
+BOT_TOKEN = os.environ['ESHOP_TG_BOT_TOKEN']
+# "-111111111" Chat that is group/channel/pm that the bot has access to
+CHAT_ID = os.environ['ESHOP_TG_CHAT_ID']
 
 def main():
   if(len(sys.argv) == 1):
